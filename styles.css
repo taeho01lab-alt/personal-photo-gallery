@@ -1,0 +1,173 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f1ea;
+  --panel: #fffdf8;
+  --border: #d7cfc1;
+  --text: #2f2a23;
+  --muted: #6e6558;
+  --snake: #285943;
+  --snake-head: #173829;
+  --food: #c74b3d;
+  --cell: #efe7da;
+  --button: #f1e6d2;
+  --button-border: #b7aa94;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.panel {
+  width: min(100%, 560px);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(47, 42, 35, 0.08);
+}
+
+.panel__header,
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.panel__header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.panel__subtitle,
+.help,
+#status {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.status-row {
+  margin: 16px 0;
+  align-items: flex-start;
+}
+
+.scoreboard {
+  min-width: 84px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+  background: #faf5eb;
+}
+
+.scoreboard__label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.scoreboard strong {
+  font-size: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  border: 1px solid var(--button-border);
+  border-radius: 10px;
+  background: var(--button);
+  color: var(--text);
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #eadcc4;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+  aspect-ratio: 1;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #e8decd;
+}
+
+.cell {
+  border-radius: 4px;
+  background: var(--cell);
+}
+
+.cell--snake {
+  background: var(--snake);
+}
+
+.cell--head {
+  background: var(--snake-head);
+}
+
+.cell--food {
+  background: var(--food);
+}
+
+.controls {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.controls__middle {
+  display: flex;
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .controls {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .panel {
+    padding: 16px;
+  }
+
+  .panel__header,
+  .status-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions button,
+  .controls button {
+    flex: 1;
+  }
+}
