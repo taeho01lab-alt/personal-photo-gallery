@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
+const AUTH_TOKEN_KEY = "personal_gallery_auth_token";
 
 class ApiError extends Error {
   constructor(message, status) {
@@ -11,9 +12,15 @@ class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
+  const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
+  const headers = options.body instanceof FormData ? {} : { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
-    headers: options.body instanceof FormData ? undefined : { "Content-Type": "application/json" },
+    headers,
     ...options,
   });
   const data = await response.json().catch(() => ({}));
@@ -49,6 +56,7 @@ function App() {
 
   const handleRequestError = useCallback((error) => {
     if (error.status === 401) {
+      window.localStorage.removeItem(AUTH_TOKEN_KEY);
       setCurrentUser(null);
       setActiveTab("auth");
       setPhotos([]);
@@ -112,6 +120,7 @@ function App() {
         method: "POST",
         body: JSON.stringify({ username: authForm.username, password: authForm.password }),
       });
+      window.localStorage.setItem(AUTH_TOKEN_KEY, data.token);
       setCurrentUser(data.user);
       setActiveTab("gallery");
       setNotice("로그인되었습니다.");
@@ -122,7 +131,11 @@ function App() {
   }
 
   async function logout() {
-    await request("/api/logout", { method: "POST" });
+    try {
+      await request("/api/logout", { method: "POST" });
+    } finally {
+      window.localStorage.removeItem(AUTH_TOKEN_KEY);
+    }
     setCurrentUser(null);
     setActiveTab("users");
     setPhotos([]);

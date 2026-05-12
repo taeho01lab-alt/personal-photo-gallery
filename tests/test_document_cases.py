@@ -58,7 +58,19 @@ def test_login_001_user_can_login_with_valid_credentials(client):
 
     assert response.status_code == 200
     assert body["message"] == "로그인 성공"
+    assert body["token"]
     assert body["user"]["username"] == "testuser"
+
+
+def test_token_auth_keeps_protected_api_available_when_cookie_is_unavailable(client):
+    create_user(client)
+    token = login(client).get_json()["token"]
+    client.post("/api/logout")
+
+    response = client.get("/api/photos", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
+    assert response.get_json()["photos"] == []
 
 
 def test_upload_001_user_can_upload_photo_with_description_and_keyword(client):

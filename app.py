@@ -7,6 +7,7 @@ from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_from_directory, session
 from flask_cors import CORS
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -23,6 +24,10 @@ app.config.update(
     MAX_CONTENT_LENGTH=10 * 1024 * 1024,
 )
 CORS(app, supports_credentials=True, origins=["http://127.0.0.1:3000", "http://localhost:3000"])
+
+
+def auth_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="gallery-auth")
 
 
 def utc_now():
@@ -74,6 +79,15 @@ def public_user(row):
 
 def current_user():
     user_id = session.get("user_id")
+    if not user_id:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header.removeprefix("Bearer ").strip()
+            try:
+                user_id = auth_serializer().loads(token, max_age=60 * 60 * 8)
+            except (BadSignature, SignatureExpired):
+                user_id = None
+
     if not user_id:
         return None
     user = get_db().execute(
@@ -211,7 +225,8 @@ def login():
 
     session.clear()
     session["user_id"] = user["id"]
-    return jsonify({"message": "로그인 성공", "user": public_user(user)})
+    token = auth_serializer().dumps(user["id"])
+    return jsonify({"message": "로그인 성공", "token": token, "user": public_user(user)})
 
 
 @app.route("/api/logout", methods=["POST"])
