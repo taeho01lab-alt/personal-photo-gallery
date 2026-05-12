@@ -81,8 +81,10 @@ def current_user():
     user_id = session.get("user_id")
     if not user_id:
         auth_header = request.headers.get("Authorization", "")
+        token = request.args.get("access_token", "")
         if auth_header.startswith("Bearer "):
             token = auth_header.removeprefix("Bearer ").strip()
+        if token:
             try:
                 user_id = auth_serializer().loads(token, max_age=60 * 60 * 8)
             except (BadSignature, SignatureExpired):

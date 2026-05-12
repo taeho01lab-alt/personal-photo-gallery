@@ -73,6 +73,18 @@ def test_token_auth_keeps_protected_api_available_when_cookie_is_unavailable(cli
     assert response.get_json()["photos"] == []
 
 
+def test_uploaded_image_can_be_loaded_by_img_tag_with_token_query(client):
+    create_user(client)
+    token = login(client).get_json()["token"]
+    photo_url = upload_sample_photo(client).get_json()["photo"]["url"]
+    client.post("/api/logout")
+
+    response = client.get(f"{photo_url}?access_token={token}")
+
+    assert response.status_code == 200
+    assert response.data == b"sample image bytes"
+
+
 def test_upload_001_user_can_upload_photo_with_description_and_keyword(client):
     create_user(client)
     login(client)

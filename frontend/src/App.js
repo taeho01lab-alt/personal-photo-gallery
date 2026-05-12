@@ -31,7 +31,12 @@ async function request(path, options = {}) {
 }
 
 function imageUrl(path) {
-  return `${API_BASE_URL}${path}`;
+  const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
+  const url = new URL(`${API_BASE_URL}${path}`);
+  if (token) {
+    url.searchParams.set("access_token", token);
+  }
+  return url.toString();
 }
 
 function App() {
