@@ -145,11 +145,6 @@ DM 기능은 이 프로젝트의 중요한 기능 중 하나입니다. 사용자
 │   └── test_app.py
 ├── uploads/
 │   └── .gitkeep
-├── docs/
-│   ├── use_cases.md
-│   ├── test_cases.md
-│   ├── uml.md
-│   └── test_report.md
 └── frontend/
     ├── package.json
     ├── package-lock.json
@@ -252,17 +247,6 @@ React 애플리케이션의 핵심 화면 로직이 구현된 파일입니다.
 - DM 전송
 - 메시지 답장
 - 메시지 삭제
-
-### `docs/`
-
-프로젝트 제출용 문서 폴더입니다.
-
-포함 문서는 다음과 같습니다.
-
-- `use_cases.md`: Use Case 설명
-- `test_cases.md`: Test Case 목록
-- `uml.md`: UML 설계 문서
-- `test_report.md`: 테스트 결과 보고서
 
 ### `uploads/`
 
@@ -476,17 +460,6 @@ OneDrive 폴더에서 `build` 폴더 권한 문제가 발생하면 다음처럼 
 $env:BUILD_PATH='C:\Users\taeho\Downloads\gallery_build'
 npm run build
 ```
-
-## 제출 문서
-
-프로젝트 제출에 필요한 보조 문서는 `docs/` 폴더에 정리되어 있습니다.
-
-- `docs/use_cases.md`: Use Case 문서
-- `docs/test_cases.md`: Test Case 문서
-- `docs/uml.md`: UML 설계 문서
-- `docs/test_report.md`: 테스트 결과 보고서
-
-API 상세 문서는 `API.md`에서 확인할 수 있습니다.
 
 ## 구현 시 주의한 점
 
