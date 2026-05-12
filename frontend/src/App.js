@@ -3,6 +3,13 @@ import "./App.css";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 
+class ApiError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
@@ -11,7 +18,7 @@ async function request(path, options = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || "요청 처리 중 오류가 발생했습니다.");
+    throw new ApiError(data.error || "요청 처리 중 오류가 발생했습니다.", response.status);
   }
   return data;
 }
@@ -40,6 +47,23 @@ function App() {
     [uploadForm.keywords]
   );
 
+  const handleRequestError = useCallback((error) => {
+    if (error.status === 401) {
+      setCurrentUser(null);
+      setActiveTab("auth");
+      setPhotos([]);
+      setMessages([]);
+      setNotice("세션이 만료되었습니다. 다시 로그인해 주세요.");
+      return;
+    }
+    setNotice(error.message);
+  }, []);
+
+  function changeTab(tab) {
+    setActiveTab(tab);
+    setNotice("");
+  }
+
   const loadUsers = useCallback(async () => {
     const data = await request("/api/users");
     setUsers(data.users);
@@ -51,18 +75,18 @@ function App() {
       const data = await request(`/api/photos${suffix}`);
       setPhotos(data.photos);
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
-  }, [keyword]);
+  }, [handleRequestError, keyword]);
 
   const loadMessages = useCallback(async () => {
     try {
       const data = await request("/api/messages?box=all");
       setMessages(data.messages);
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
-  }, []);
+  }, [handleRequestError]);
 
   useEffect(() => {
     request("/api/me").then((data) => setCurrentUser(data.user)).catch(() => setCurrentUser(null));
@@ -123,7 +147,7 @@ function App() {
       setNotice("사진이 업로드되었습니다.");
       loadPhotos("");
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
   }
 
@@ -142,7 +166,7 @@ function App() {
       setNotice("사진 정보가 수정되었습니다.");
       loadPhotos();
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
   }
 
@@ -155,7 +179,7 @@ function App() {
       setMessageDrafts({ ...messageDrafts, [photoId]: "" });
       setNotice("DM을 보냈습니다.");
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
   }
 
@@ -169,7 +193,7 @@ function App() {
       setNotice("답장을 보냈습니다.");
       loadMessages();
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
   }
 
@@ -179,7 +203,7 @@ function App() {
       setNotice("메시지가 삭제되었습니다.");
       loadMessages();
     } catch (error) {
-      setNotice(error.message);
+      handleRequestError(error);
     }
   }
 
@@ -197,24 +221,24 @@ function App() {
               <button onClick={logout}>로그아웃</button>
             </>
           ) : (
-            <button onClick={() => setActiveTab("auth")}>로그인</button>
+            <button onClick={() => changeTab("auth")}>로그인</button>
           )}
         </div>
       </header>
 
       <nav className="tabs">
-        <button className={activeTab === "users" ? "active" : ""} onClick={() => setActiveTab("users")}>
+        <button className={activeTab === "users" ? "active" : ""} onClick={() => changeTab("users")}>
           사용자 목록
         </button>
-        <button className={activeTab === "auth" ? "active" : ""} onClick={() => setActiveTab("auth")}>
+        <button className={activeTab === "auth" ? "active" : ""} onClick={() => changeTab("auth")}>
           회원가입/로그인
         </button>
         {currentUser && (
           <>
-            <button className={activeTab === "gallery" ? "active" : ""} onClick={() => setActiveTab("gallery")}>
+            <button className={activeTab === "gallery" ? "active" : ""} onClick={() => changeTab("gallery")}>
               사진 갤러리
             </button>
-            <button className={activeTab === "messages" ? "active" : ""} onClick={() => setActiveTab("messages")}>
+            <button className={activeTab === "messages" ? "active" : ""} onClick={() => changeTab("messages")}>
               메시지
             </button>
           </>
